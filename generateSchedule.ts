@@ -1,6 +1,6 @@
 import getSeasonDates from './helpers/getSeasonDates'
 import { teams } from './teams'
-import { Game, Matchup, Team } from './types'
+import { Game, Matchup, Schedule, Team } from './types'
 
 // 3 Games Each Against 4 Conference Non Division Teams
 
@@ -43,7 +43,7 @@ may lead to a slight imbalance
 
 */
 
-export default function generateSchedule(schedule: Game[], selectedMatchups: Matchup[], gamesScheduled: Set<string>) {
+export default function generateSchedule(schedule: Schedule, selectedMatchups: Matchup[], gamesScheduled: Set<string>) {
     let equalHomeAwayGames = false
     while (!equalHomeAwayGames) {
         selectedMatchups = []
@@ -154,33 +154,35 @@ export default function generateSchedule(schedule: Game[], selectedMatchups: Mat
     
     const dates = getSeasonDates()
 
-    const teamSchedules: {[key: string]: Set<string>} = {}
+    const teamScheduleOpenDates: {[key: string]: Set<string>} = {}
 
     teams.forEach(team => {
-        teamSchedules[team.name] = new Set()
+        teamScheduleOpenDates[team.name] = new Set()
         dates.forEach(date => {
-            teamSchedules[team.name].add(date)
+            teamScheduleOpenDates[team.name].add(date)
         })
     })
 
-    selectedMatchups.forEach((matchup: Matchup) => {
-        const homeTeamOpenDates = Array.from(teamSchedules[matchup.home.name])
-        const awayTeamOpenDates = teamSchedules[matchup.away.name]
+    selectedMatchups.forEach((matchup: Matchup, index) => {
+        const homeTeamOpenDates = Array.from(teamScheduleOpenDates[matchup.home.name])
+        const awayTeamOpenDates = teamScheduleOpenDates[matchup.away.name]
 
         const commonOpenDates = homeTeamOpenDates.filter(date => awayTeamOpenDates.has(date))
         const randomOpenDate = commonOpenDates[Math.floor(Math.random() * commonOpenDates.length)]
 
-        teamSchedules[matchup.home.name].delete(randomOpenDate) 
-        teamSchedules[matchup.away.name].delete(randomOpenDate) 
+        teamScheduleOpenDates[matchup.home.name].delete(randomOpenDate) 
+        teamScheduleOpenDates[matchup.away.name].delete(randomOpenDate) 
 
-        schedule.push({
+        const gameObject = {
+            id: index+1,
             home: matchup.home.name,
             away: matchup.away.name,
             arena: matchup.home.stadium,
-            date: randomOpenDate,
-            time: '7:00 EST'
-        })
-    })
+            date: randomOpenDate
+        }
 
+        schedule[matchup.away.name].push(gameObject)
+        schedule[matchup.home.name].push(gameObject)
+    })
     return schedule
 }

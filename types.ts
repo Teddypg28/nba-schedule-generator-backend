@@ -2,12 +2,16 @@ export interface TeamAvailableDates {
     [key: string]: Set<string>
 }
 
+export interface Schedule {
+    [key: string]: Game[]
+}
+
 export interface Game {
+    id: number
     home: Team['name'],
     away: Team['name'],
     date: string,
-    arena: Team['stadium'],
-    time: string
+    arena: Team['stadium']
 }
 
 export interface Team {

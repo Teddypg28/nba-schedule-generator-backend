@@ -1,20 +1,19 @@
 import { teams } from "../teams"
-import { Game } from "../types"
+import { Game, Schedule } from "../types"
 
-// returns the total number of back to backs in a given schedule
-export default function getNumBackToBacks(schedule: Game[]) {
+// returns the total number of back to backs in a given full NBA schedule (all teams or a specific team)
+export default function getNumBackToBacks(schedule: Schedule, team?: string) {
     let numBackToBacks = 0
-    teams.forEach(team => {
-        const teamSchedule = schedule.filter(game => game.home === team.name || game.away === team.name).sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
-        teamSchedule.forEach((game, index) => {
-            if (index < teamSchedule.length - 1) {
-                const currentGame = new Date(game.date).valueOf()
-                const nextGame = new Date(teamSchedule[index+1].date).valueOf()
-                if (((nextGame - currentGame) / (1000 * 3600 * 24)) <= 1) {
-                    numBackToBacks++
-                }
+    const filteredTeams = team ? [team] : [...teams.map(team => team.name)]
+    filteredTeams.forEach(team => {
+        const teamSchedule = Array.from(schedule[team]).sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
+        for (let i = 0; i<teamSchedule.length - 1; i++) {
+            const currentGame = new Date(teamSchedule[i].date).valueOf()
+            const nextGame = new Date(teamSchedule[i+1].date).valueOf()
+            if (((nextGame - currentGame) / (1000 * 3600 * 24)) <= 1) {
+                numBackToBacks++
             } 
-        })
+        }
     })
     return numBackToBacks
 }

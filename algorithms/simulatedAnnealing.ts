@@ -1,21 +1,24 @@
-import { Game } from "../types";
+import { Game, Schedule, TeamAvailableDates } from "../types";
 
 import getMutualOpenDates from "../helpers/getMutualOpenDates";
 import getNumBackToBacks from "../helpers/getNumBackToBacks";
 import getTeamAvailableDates from "../helpers/getTeamAvailableDates";
 import updateTeamAvailableDates from "../helpers/updateTeamAvailableDates";
 import calculateScheduleCost from "../helpers/calculateScheduleCost";
+import { teams } from "../teams";
 
-export default function simulatedAnnealing(schedule: Game[], temperature: number, coolingRate: number) {
+export default function simulatedAnnealing(schedule: Schedule, temperature: number, coolingRate: number) {
     let iterations = 0
-    let currentCost = getNumBackToBacks(schedule)
-    let currentSchedule = JSON.parse(JSON.stringify(schedule))
-    let bestSchedule = JSON.parse(JSON.stringify(currentSchedule))
+    let currentCost = calculateScheduleCost(schedule)
+    let currentSchedule: Schedule = JSON.parse(JSON.stringify(schedule))
+    let bestSchedule: Schedule = JSON.parse(JSON.stringify(currentSchedule))
 
-    const teamAvailableDates: any = getTeamAvailableDates(schedule)
+    const teamAvailableDates: TeamAvailableDates = getTeamAvailableDates(schedule)
 
-    while (temperature > 0.05) {
-        const randomGame = currentSchedule[Math.floor(Math.random() * schedule.length)]
+    while (temperature > 0.001) {
+        const randomTeam = teams[Math.floor(Math.random() * 30)]
+        const randomTeamSchedule = currentSchedule[randomTeam.name]
+        const randomGame = randomTeamSchedule[Math.floor(Math.random() * randomTeamSchedule.length)]
         const originalDate = randomGame.date
         const mutualOpenDates = getMutualOpenDates(randomGame.home, randomGame.away, teamAvailableDates)
         if (mutualOpenDates.length > 0) {

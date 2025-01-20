@@ -25,14 +25,14 @@ app.get('/', (req, res) => {
 
     const initialSchedule = generateSchedule(schedule, selectedMatchups, gamesScheduled)
 
-    console.log(`Started...${new Date()}`)
+    console.log("Started...", new Date())
     const optimizedSchedule = hillClimbing(initialSchedule)
-    console.log(`Finished...${new Date()}`)
+    const optimizedSchedule2 = hillClimbing(optimizedSchedule)
+    console.log("Finished...", new Date())
 
-    console.log('Triples: ', getNumTriples(optimizedSchedule))
-    console.log('Back to Backs: ', getNumBackToBacks(optimizedSchedule))
+    console.log('Back to Backs: ', getNumBackToBacks(optimizedSchedule2))
 
-    res.send(optimizedSchedule['Milwaukee Bucks'])
+    res.send(optimizedSchedule2['Milwaukee Bucks'])
 })
 
 

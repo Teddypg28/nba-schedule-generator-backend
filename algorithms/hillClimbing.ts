@@ -10,8 +10,8 @@ import { teams } from "../teams"
 export default function hillClimbing(schedule: Schedule) {
     let iterations = 0
     let currentCost = calculateScheduleCost(schedule)
-    let currentSchedule: Schedule = JSON.parse(JSON.stringify(schedule))
-    let bestSchedule: Schedule = JSON.parse(JSON.stringify(currentSchedule))
+    let currentSchedule: Schedule = structuredClone(schedule)
+    let bestSchedule: Schedule = structuredClone(currentSchedule)
 
     const teamAvailableDates: TeamAvailableDates = getTeamAvailableDates(schedule)
 
@@ -34,15 +34,20 @@ export default function hillClimbing(schedule: Schedule) {
             homeTeamScheduleGame.date = randomOpenDate
             awayTeamScheduleGame.date = randomOpenDate
 
+            currentSchedule[homeTeam].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
+            currentSchedule[awayTeam].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
+
             const cost = calculateScheduleCost(currentSchedule)
             if (cost < currentCost) {
                 currentCost = cost
-                bestSchedule = JSON.parse(JSON.stringify(currentSchedule))
+                bestSchedule = structuredClone(currentSchedule)
                 updateTeamAvailableDates(teamAvailableDates, homeTeam, awayTeam, randomOpenDate, originalDate)
             } 
             else {
                 homeTeamScheduleGame.date = originalDate
                 awayTeamScheduleGame.date = originalDate
+                currentSchedule[homeTeam].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
+                currentSchedule[awayTeam].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
             }
         }
         iterations++

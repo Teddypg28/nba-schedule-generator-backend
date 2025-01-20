@@ -1,6 +1,6 @@
 import getSeasonDates from './helpers/getSeasonDates'
 import { teams } from './teams'
-import { Game, Matchup, Schedule, Team } from './types'
+import { Matchup, Schedule, Team } from './types'
 
 // 3 Games Each Against 4 Conference Non Division Teams
 
@@ -184,5 +184,8 @@ export default function generateSchedule(schedule: Schedule, selectedMatchups: M
         schedule[matchup.away.name].push(gameObject)
         schedule[matchup.home.name].push(gameObject)
     })
+
+    teams.forEach(team => schedule[team.name].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf()))
+
     return schedule
 }

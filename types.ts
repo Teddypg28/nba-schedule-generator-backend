@@ -11,14 +11,14 @@ export interface Game {
     home: Team,
     away: Team,
     date: string,
-    arena: Team['stadium']
+    arena: Team['arena']
 }
 
 export interface Team {
     name: string,
     division: string,
     conference: string,
-    stadium: string,
+    arena: string,
     coordinates: {lat: number, lon: number}
 }
 

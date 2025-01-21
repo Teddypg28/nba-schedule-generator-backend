@@ -1,6 +1,5 @@
-import { teams } from "../teams";
 import { Schedule } from "../types";
-import calculateDistance from "./calculateDistance";
+import calculateTripDistance from "./calculateTripDistance";
 
 import getStandardDev from "./getStandardDev";
 
@@ -15,22 +14,22 @@ export default function calculateScheduleCost(schedule: Schedule) {
     let num5HomeGamesInARow = 0
     let num5AwayGamesInARow = 0
 
-    teams.forEach(team => {
+    Object.keys(schedule).forEach(team => {
         let milesTraveled = 0
         let numTeamBackToBacks = 0
         
-        const teamSchedule = schedule[team.name]
+        const teamSchedule = schedule[team]
         const gameDates = teamSchedule.map(game => new Date(game.date).valueOf())
 
         teamSchedule.forEach((game, index) => {
             if (index < teamSchedule.length - 4) {
                 // check for number of 5 home games in a row stretches
-                const is5HomeGamesInRow = game.home.name === team.name
-                    && teamSchedule.slice(index+1, index+5).every(g => g.home.name === team.name);
+                const is5HomeGamesInRow = game.home.name === team
+                    && teamSchedule.slice(index+1, index+5).every(g => g.home.name === team);
                 if (is5HomeGamesInRow) num5HomeGamesInARow++;
                 // check for number of 5 away games in a row stretches
-                const is5AwayGamesInRow = game.away.name === team.name
-                    && teamSchedule.slice(index+1, index+5).every(g => g.away.name === team.name);
+                const is5AwayGamesInRow = game.away.name === team
+                    && teamSchedule.slice(index+1, index+5).every(g => g.away.name === team);
                 if (is5AwayGamesInRow) num5AwayGamesInARow++;
             }
             if (index < teamSchedule.length - 2 && Math.round((gameDates[index+2] - gameDates[index]) / (1000 * 3600 * 24)) === 2) {
@@ -46,10 +45,10 @@ export default function calculateScheduleCost(schedule: Schedule) {
                     numTeamBackToBacks++
                 } 
                 // check for number of miles traveled between games
-                if (game.home.name !== team.name || teamSchedule[index+1].home.name !== team.name) {
+                if (game.home.name !== team || teamSchedule[index+1].home.name !== team) {
                     const startingPoint = game.home
                     const destination = teamSchedule[index+1].home
-                    const distance = calculateDistance(startingPoint, destination)
+                    const distance = calculateTripDistance(startingPoint, destination)
                     milesTraveled += distance
                     totalMilesTraveled += distance
                 }

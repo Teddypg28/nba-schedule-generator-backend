@@ -29,10 +29,12 @@ app.get('/hc/:iterations', (req, res) => {
 
     const numBackToBacks = getNumBackToBacks(optimizedSchedule)
 
-    res.send(`${numBackToBacks} back to backs`)
+    const result = { numBackToBacks, optimizedSchedule }
+
+    res.send(result)
 })
 
-app.get('/sa/:temperature/:coolingRate', (req, res) => {
+app.get('/sa/:temperature/:coolingRate/:iterations', (req, res) => {
     let schedule: Schedule = {}
     teams.forEach(team => schedule[team.name] = [])
 
@@ -41,13 +43,16 @@ app.get('/sa/:temperature/:coolingRate', (req, res) => {
 
     const temperature = parseInt(req.params.temperature)
     const coolingRate = parseFloat(req.params.coolingRate)
+    const iterations = parseInt(req.params.iterations)
 
     const initialSchedule = generateSchedule(schedule, selectedMatchups, gamesScheduled)
-    const optimizedSchedule = simulatedAnnealing(initialSchedule, temperature, coolingRate)
+    const optimizedSchedule = simulatedAnnealing(initialSchedule, temperature, coolingRate, iterations)
 
     const numBackToBacks = getNumBackToBacks(optimizedSchedule)
 
-    res.send(`${numBackToBacks} back to backs`)
+    const result = { numBackToBacks, optimizedSchedule }
+
+    res.send(result)
 })
 
 

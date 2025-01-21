@@ -1,53 +1,35 @@
-import { Game, Schedule, TeamAvailableDates } from "../types"
+import { Schedule, TeamAvailableDates } from "../types"
 
-import getMutualOpenDates from "../helpers/getMutualOpenDates"
 import getTeamAvailableDates from "../helpers/getTeamAvailableDates"
 import updateTeamAvailableDates from "../helpers/updateTeamAvailableDates"
 import calculateScheduleCost from "../helpers/calculateScheduleCost"
 
-import { teams } from "../teams"
+import selectRandomGame from "../helpers/selectRandomGame"
+import changeGameDate from "../helpers/changeGameDate"
+import undoGameDateChange from "../helpers/undoGameDateChange"
 
 export default function hillClimbing(schedule: Schedule, numIterations: number) {
     let iterations = 0
     let currentCost = calculateScheduleCost(schedule)
     let currentSchedule: Schedule = structuredClone(schedule)
-    let bestSchedule: Schedule = structuredClone(currentSchedule)
+    let bestSchedule: Schedule = currentSchedule
 
     const teamAvailableDates: TeamAvailableDates = getTeamAvailableDates(schedule)
 
     while (iterations < numIterations) {
-        const randomTeam = teams[Math.floor(Math.random() * 30)]
-        const randomTeamSchedule = currentSchedule[randomTeam.name]
-        const randomGame = randomTeamSchedule[Math.floor(Math.random() * randomTeamSchedule.length)]
-        
-        const originalDate = randomGame.date
-        const homeTeam = randomGame.home
-        const awayTeam = randomGame.away
-
-        const homeTeamScheduleGame = currentSchedule[homeTeam.name].find(game => game.id === randomGame.id) as Game
-        const awayTeamScheduleGame = currentSchedule[awayTeam.name].find(game => game.id === randomGame.id) as Game
-
-        const mutualOpenDates = getMutualOpenDates(randomGame.home.name, randomGame.away.name, teamAvailableDates)
+        // select random game
+        const { mutualOpenDates, awayTeamScheduleGame, homeTeamScheduleGame, originalDate } = selectRandomGame(currentSchedule, teamAvailableDates)
         if (mutualOpenDates.length > 0) {
-            const randomOpenDate = mutualOpenDates[Math.floor(Math.random() * mutualOpenDates.length)]
-            
-            homeTeamScheduleGame.date = randomOpenDate
-            awayTeamScheduleGame.date = randomOpenDate
-
-            currentSchedule[homeTeam.name].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
-            currentSchedule[awayTeam.name].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
-
+            // change the date of the game to a random date
+            const randomOpenDate = changeGameDate(mutualOpenDates, homeTeamScheduleGame, awayTeamScheduleGame, currentSchedule)
+            // calculate the cost of the schedule after the date change
             const cost = calculateScheduleCost(currentSchedule)
+            // accept the change if the cost is reduced, otherwise undo the change
             if (cost < currentCost) {
                 currentCost = cost
-                bestSchedule = structuredClone(currentSchedule)
-                updateTeamAvailableDates(teamAvailableDates, homeTeam.name, awayTeam.name, randomOpenDate, originalDate)
-            } 
-            else {
-                homeTeamScheduleGame.date = originalDate
-                awayTeamScheduleGame.date = originalDate
-                currentSchedule[homeTeam.name].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
-                currentSchedule[awayTeam.name].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
+                updateTeamAvailableDates(teamAvailableDates, homeTeamScheduleGame.home.name, awayTeamScheduleGame.away.name, randomOpenDate, originalDate )
+            } else {
+                undoGameDateChange(homeTeamScheduleGame, awayTeamScheduleGame, originalDate, currentSchedule)
             }
         }
         iterations++

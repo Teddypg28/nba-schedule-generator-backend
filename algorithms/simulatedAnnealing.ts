@@ -1,45 +1,45 @@
 import { Schedule, TeamAvailableDates } from "../types";
 
-import getMutualOpenDates from "../helpers/getMutualOpenDates";
 import getTeamAvailableDates from "../helpers/getTeamAvailableDates";
 import updateTeamAvailableDates from "../helpers/updateTeamAvailableDates";
 import calculateScheduleCost from "../helpers/calculateScheduleCost";
-import { teams } from "../teams";
 
-export default function simulatedAnnealing(schedule: Schedule, temperature: number, coolingRate: number) {
+import selectRandomGame from "../helpers/selectRandomGame";
+import changeGameDate from "../helpers/changeGameDate";
+import undoGameDateChange from "../helpers/undoGameDateChange";
+
+export default function simulatedAnnealing(schedule: Schedule, temperature: number, coolingRate: number, iterations: number) {
     let currentCost = calculateScheduleCost(schedule)
     let currentSchedule: Schedule = JSON.parse(JSON.stringify(schedule))
-    let bestSchedule: Schedule = JSON.parse(JSON.stringify(currentSchedule))
+    let bestSchedule = currentSchedule
+    let numIterations = 0
+
+    const initialTemperature = temperature
 
     const teamAvailableDates: TeamAvailableDates = getTeamAvailableDates(schedule)
 
-    while (temperature > 0.001) {
-        const randomTeam = teams[Math.floor(Math.random() * 30)]
-        const randomTeamSchedule = currentSchedule[randomTeam.name]
-        const randomGame = randomTeamSchedule[Math.floor(Math.random() * randomTeamSchedule.length)]
-        const originalDate = randomGame.date
-        const mutualOpenDates = getMutualOpenDates(randomGame.home.name, randomGame.away.name, teamAvailableDates)
-        if (mutualOpenDates.length > 0) {
-            const randomOpenDate: any = mutualOpenDates[Math.floor(Math.random() * mutualOpenDates.length)]
-            randomGame.date = randomOpenDate
-            const cost = calculateScheduleCost(currentSchedule)
-            if (cost < currentCost) {
-                currentCost = cost
-                bestSchedule = JSON.parse(JSON.stringify(currentSchedule))
-                updateTeamAvailableDates(teamAvailableDates, randomGame.home.name, randomGame.away.name, randomOpenDate, originalDate)
-            } 
-            else {
-                const acceptanceProbability = Math.exp((currentCost - cost) / temperature)
-                if (Math.random() < acceptanceProbability) {
+    while (numIterations < iterations) {
+        // reset the temperature for each iteration
+        temperature = initialTemperature
+        while (temperature > 0.001) {
+            // select random game
+            const { mutualOpenDates, awayTeamScheduleGame, homeTeamScheduleGame, originalDate } = selectRandomGame(currentSchedule, teamAvailableDates)
+            if (mutualOpenDates.length > 0) {
+                // change the date of the game to a random date
+                const randomOpenDate = changeGameDate(mutualOpenDates, homeTeamScheduleGame, awayTeamScheduleGame, currentSchedule)
+                // calculate the cost of the schedule after the date change
+                const cost = calculateScheduleCost(currentSchedule)
+                // accept the change if the cost is reduced, otherwise undo the change
+                if (cost < currentCost || Math.random() < Math.exp((currentCost - cost) / temperature)) {
                     currentCost = cost
-                    updateTeamAvailableDates(teamAvailableDates, randomGame.home.name, randomGame.away.name, randomOpenDate, originalDate)
-
+                    updateTeamAvailableDates(teamAvailableDates, homeTeamScheduleGame.home.name, awayTeamScheduleGame.away.name, randomOpenDate, originalDate )
                 } else {
-                    randomGame.date = originalDate
+                    undoGameDateChange(homeTeamScheduleGame, awayTeamScheduleGame, originalDate, currentSchedule)
                 }
             }
+            temperature *= coolingRate
         }
-        temperature *= coolingRate
+        numIterations++
     }
     return bestSchedule
 }

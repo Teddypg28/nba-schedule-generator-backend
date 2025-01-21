@@ -8,8 +8,8 @@ export interface Schedule {
 
 export interface Game {
     id: number
-    home: Team['name'],
-    away: Team['name'],
+    home: Team,
+    away: Team,
     date: string,
     arena: Team['stadium']
 }

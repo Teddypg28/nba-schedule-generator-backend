@@ -1,13 +1,12 @@
 import express from 'express'
 import generateSchedule from './generateSchedule'
-import getNumBackToBacks from './helpers/getNumBackToBacks'
 
 import hillClimbing from './algorithms/hillClimbing'
 import simulatedAnnealing from './algorithms/simulatedAnnealing'
 
 import { Matchup, Schedule } from './types'
 import { teams } from './teams'
-import getNumTriples from './helpers/getNumTriples'
+import getNumBackToBacks from './helpers/getNumBackToBacks'
 
 const PORT_NUMBER = 2828
 const app = express()
@@ -16,23 +15,40 @@ app.listen(PORT_NUMBER, () => {
     console.log(`Server started on PORT ${PORT_NUMBER}`)
 })
 
-app.get('/', (req, res) => {
+app.get('/hc/:iterations', (req, res) => {
     let schedule: Schedule = {}
     teams.forEach(team => schedule[team.name] = [])
 
     let selectedMatchups: Matchup[] = []
     let gamesScheduled: Set<string> = new Set();
 
+    const numIterations = parseInt(req.params.iterations)
+
     const initialSchedule = generateSchedule(schedule, selectedMatchups, gamesScheduled)
+    const optimizedSchedule = hillClimbing(initialSchedule, numIterations)
 
-    console.log("Started...", new Date())
-    const optimizedSchedule = hillClimbing(initialSchedule)
-    const optimizedSchedule2 = hillClimbing(optimizedSchedule)
-    console.log("Finished...", new Date())
+    const numBackToBacks = getNumBackToBacks(optimizedSchedule)
 
-    console.log('Back to Backs: ', getNumBackToBacks(optimizedSchedule2))
-
-    res.send(optimizedSchedule2['Milwaukee Bucks'])
+    res.send(`${numBackToBacks} back to backs`)
 })
+
+app.get('/sa/:temperature/:coolingRate', (req, res) => {
+    let schedule: Schedule = {}
+    teams.forEach(team => schedule[team.name] = [])
+
+    let selectedMatchups: Matchup[] = []
+    let gamesScheduled: Set<string> = new Set();
+
+    const temperature = parseInt(req.params.temperature)
+    const coolingRate = parseFloat(req.params.coolingRate)
+
+    const initialSchedule = generateSchedule(schedule, selectedMatchups, gamesScheduled)
+    const optimizedSchedule = simulatedAnnealing(initialSchedule, temperature, coolingRate)
+
+    const numBackToBacks = getNumBackToBacks(optimizedSchedule)
+
+    res.send(`${numBackToBacks} back to backs`)
+})
+
 
 

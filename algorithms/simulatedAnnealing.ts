@@ -1,14 +1,12 @@
-import { Game, Schedule, TeamAvailableDates } from "../types";
+import { Schedule, TeamAvailableDates } from "../types";
 
 import getMutualOpenDates from "../helpers/getMutualOpenDates";
-import getNumBackToBacks from "../helpers/getNumBackToBacks";
 import getTeamAvailableDates from "../helpers/getTeamAvailableDates";
 import updateTeamAvailableDates from "../helpers/updateTeamAvailableDates";
 import calculateScheduleCost from "../helpers/calculateScheduleCost";
 import { teams } from "../teams";
 
 export default function simulatedAnnealing(schedule: Schedule, temperature: number, coolingRate: number) {
-    let iterations = 0
     let currentCost = calculateScheduleCost(schedule)
     let currentSchedule: Schedule = JSON.parse(JSON.stringify(schedule))
     let bestSchedule: Schedule = JSON.parse(JSON.stringify(currentSchedule))
@@ -20,7 +18,7 @@ export default function simulatedAnnealing(schedule: Schedule, temperature: numb
         const randomTeamSchedule = currentSchedule[randomTeam.name]
         const randomGame = randomTeamSchedule[Math.floor(Math.random() * randomTeamSchedule.length)]
         const originalDate = randomGame.date
-        const mutualOpenDates = getMutualOpenDates(randomGame.home, randomGame.away, teamAvailableDates)
+        const mutualOpenDates = getMutualOpenDates(randomGame.home.name, randomGame.away.name, teamAvailableDates)
         if (mutualOpenDates.length > 0) {
             const randomOpenDate: any = mutualOpenDates[Math.floor(Math.random() * mutualOpenDates.length)]
             randomGame.date = randomOpenDate
@@ -28,13 +26,13 @@ export default function simulatedAnnealing(schedule: Schedule, temperature: numb
             if (cost < currentCost) {
                 currentCost = cost
                 bestSchedule = JSON.parse(JSON.stringify(currentSchedule))
-                updateTeamAvailableDates(teamAvailableDates, randomGame.home, randomGame.away, randomOpenDate, originalDate)
+                updateTeamAvailableDates(teamAvailableDates, randomGame.home.name, randomGame.away.name, randomOpenDate, originalDate)
             } 
             else {
                 const acceptanceProbability = Math.exp((currentCost - cost) / temperature)
                 if (Math.random() < acceptanceProbability) {
                     currentCost = cost
-                    updateTeamAvailableDates(teamAvailableDates, randomGame.home, randomGame.away, randomOpenDate, originalDate)
+                    updateTeamAvailableDates(teamAvailableDates, randomGame.home.name, randomGame.away.name, randomOpenDate, originalDate)
 
                 } else {
                     randomGame.date = originalDate
@@ -42,7 +40,6 @@ export default function simulatedAnnealing(schedule: Schedule, temperature: numb
             }
         }
         temperature *= coolingRate
-        iterations++
     }
     return bestSchedule
 }

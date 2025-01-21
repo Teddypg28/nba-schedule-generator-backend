@@ -15,8 +15,6 @@ export default function calculateScheduleCost(schedule: Schedule) {
     let num5HomeGamesInARow = 0
     let num5AwayGamesInARow = 0
 
-    const teamsMap = Object.fromEntries(teams.map(team => [team.name, team]))
-
     teams.forEach(team => {
         let milesTraveled = 0
         let numTeamBackToBacks = 0
@@ -26,37 +24,31 @@ export default function calculateScheduleCost(schedule: Schedule) {
 
         teamSchedule.forEach((game, index) => {
             if (index < teamSchedule.length - 4) {
-                if (game.home === team.name 
-                    && teamSchedule[index+1].home === team.name 
-                    && teamSchedule[index+2].home === team.name 
-                    && teamSchedule[index+3].home === team.name 
-                    && teamSchedule[index+4].home === team.name) {
-                        num5HomeGamesInARow++
-                }
-                if (game.away === team.name 
-                    && teamSchedule[index+1].away === team.name 
-                    && teamSchedule[index+2].away === team.name 
-                    && teamSchedule[index+3].away === team.name
-                    && teamSchedule[index+4].away === team.name
-                    ) {
-                        num5AwayGamesInARow++
-                }
+                // check for number of 5 home games in a row stretches
+                const is5HomeGamesInRow = game.home.name === team.name
+                    && teamSchedule.slice(index+1, index+5).every(g => g.home.name === team.name);
+                if (is5HomeGamesInRow) num5HomeGamesInARow++;
+                // check for number of 5 away games in a row stretches
+                const is5AwayGamesInRow = game.away.name === team.name
+                    && teamSchedule.slice(index+1, index+5).every(g => g.away.name === team.name);
+                if (is5AwayGamesInRow) num5AwayGamesInARow++;
             }
             if (index < teamSchedule.length - 2 && Math.round((gameDates[index+2] - gameDates[index]) / (1000 * 3600 * 24)) === 2) {
+                // check for number of triples
                 numTriples++
             }
             if (index < teamSchedule.length - 1) {
+                // check for number of back to backs
                 const currentGame = gameDates[index]
                 const nextGame = gameDates[index+1]
                 if (((nextGame - currentGame) / (1000 * 3600 * 24)) <= 1) {
                     numBackToBacks++
                     numTeamBackToBacks++
                 } 
-                if (game.home === team.name && teamSchedule[index+1].home === team.name) {
-                    milesTraveled += 0
-                } else {
-                    const startingPoint = teamsMap[game.home]
-                    const destination = teamsMap[teamSchedule[index+1].home]
+                // check for number of miles traveled between games
+                if (game.home.name !== team.name || teamSchedule[index+1].home.name !== team.name) {
+                    const startingPoint = game.home
+                    const destination = teamSchedule[index+1].home
                     const distance = calculateDistance(startingPoint, destination)
                     milesTraveled += distance
                     totalMilesTraveled += distance

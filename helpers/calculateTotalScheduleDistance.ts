@@ -9,11 +9,11 @@ export default function calculateTotalScheduleDistance(schedule: Schedule, team:
     let totalDistanceTraveled = 0
     teamSchedule.forEach((game, index) => {
         if (index < teamSchedule.length - 1) {
-            if (game.home === team && teamSchedule[index+1].home === team) {
+            if (game.home.name === team && teamSchedule[index+1].home.name === team) {
                 totalDistanceTraveled += 0
             } else {
-                const startingPoint = teamsMap[game.home]
-                const destination = teamsMap[teamSchedule[index+1].home]
+                const startingPoint = teamsMap[game.home.name]
+                const destination = teamsMap[teamSchedule[index+1].home.name]
                 totalDistanceTraveled += calculateDistance(startingPoint, destination)
             }
         }

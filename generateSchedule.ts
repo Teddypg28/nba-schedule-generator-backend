@@ -175,8 +175,8 @@ export default function generateSchedule(schedule: Schedule, selectedMatchups: M
 
         const gameObject = {
             id: index+1,
-            home: matchup.home.name,
-            away: matchup.away.name,
+            home: matchup.home,
+            away: matchup.away,
             arena: matchup.home.stadium,
             date: randomOpenDate
         }

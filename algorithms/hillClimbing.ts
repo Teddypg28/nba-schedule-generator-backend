@@ -7,7 +7,7 @@ import calculateScheduleCost from "../helpers/calculateScheduleCost"
 
 import { teams } from "../teams"
 
-export default function hillClimbing(schedule: Schedule) {
+export default function hillClimbing(schedule: Schedule, numIterations: number) {
     let iterations = 0
     let currentCost = calculateScheduleCost(schedule)
     let currentSchedule: Schedule = structuredClone(schedule)
@@ -15,7 +15,7 @@ export default function hillClimbing(schedule: Schedule) {
 
     const teamAvailableDates: TeamAvailableDates = getTeamAvailableDates(schedule)
 
-    while (iterations < 100000) {
+    while (iterations < numIterations) {
         const randomTeam = teams[Math.floor(Math.random() * 30)]
         const randomTeamSchedule = currentSchedule[randomTeam.name]
         const randomGame = randomTeamSchedule[Math.floor(Math.random() * randomTeamSchedule.length)]
@@ -24,30 +24,30 @@ export default function hillClimbing(schedule: Schedule) {
         const homeTeam = randomGame.home
         const awayTeam = randomGame.away
 
-        const homeTeamScheduleGame = currentSchedule[homeTeam].find(game => game.id === randomGame.id) as Game
-        const awayTeamScheduleGame = currentSchedule[awayTeam].find(game => game.id === randomGame.id) as Game
+        const homeTeamScheduleGame = currentSchedule[homeTeam.name].find(game => game.id === randomGame.id) as Game
+        const awayTeamScheduleGame = currentSchedule[awayTeam.name].find(game => game.id === randomGame.id) as Game
 
-        const mutualOpenDates = getMutualOpenDates(randomGame.home, randomGame.away, teamAvailableDates)
+        const mutualOpenDates = getMutualOpenDates(randomGame.home.name, randomGame.away.name, teamAvailableDates)
         if (mutualOpenDates.length > 0) {
             const randomOpenDate = mutualOpenDates[Math.floor(Math.random() * mutualOpenDates.length)]
             
             homeTeamScheduleGame.date = randomOpenDate
             awayTeamScheduleGame.date = randomOpenDate
 
-            currentSchedule[homeTeam].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
-            currentSchedule[awayTeam].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
+            currentSchedule[homeTeam.name].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
+            currentSchedule[awayTeam.name].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
 
             const cost = calculateScheduleCost(currentSchedule)
             if (cost < currentCost) {
                 currentCost = cost
                 bestSchedule = structuredClone(currentSchedule)
-                updateTeamAvailableDates(teamAvailableDates, homeTeam, awayTeam, randomOpenDate, originalDate)
+                updateTeamAvailableDates(teamAvailableDates, homeTeam.name, awayTeam.name, randomOpenDate, originalDate)
             } 
             else {
                 homeTeamScheduleGame.date = originalDate
                 awayTeamScheduleGame.date = originalDate
-                currentSchedule[homeTeam].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
-                currentSchedule[awayTeam].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
+                currentSchedule[homeTeam.name].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
+                currentSchedule[awayTeam.name].sort((a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf())
             }
         }
         iterations++

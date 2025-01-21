@@ -3,16 +3,16 @@ This project provides a simple Express.js API that can be used to optimize autom
 There are two endpoints for each algorithm that the code utilizes: hill climbing and simulated annealing.
 
 The simulated annealing endpoints takes in 3 parameters --> /sa/:temperature/:coolingRate/:iterations
-  - temperature: the initial temperature (Ex: 10000)
+  - temperature: the initial temperature (Ex: 30000)
   - coolingRate: the rate at which the temperature cools (Ex: 0.9995)
-  - iterations: the number of times to run the algorithm on a generated schedule
+  - iterations: the number of times to run the algorithm on a generated schedule (Ex: 3)
 
 The hill climbing endpoint takes in 1 parameter --> /hc/:iterations
-  - iterations: the number of times to run the loop before returning the optimized schedule
+  - iterations: the number of times to run the loop before returning the optimized schedule (Ex: 200000)
 
 Upon making a request to each endpoint:
 
-1)  The code generates an NBA schedule that adheres to the following constraints for each NBA team:
+1)  An NBA schedule that adheres to the following constraints for each NBA team is generated:
   - 4 games against the other 4 division opponents (4×4=16 games)
   - 4 games against 6 (out-of-division) conference opponents (4×6=24 games)
   - 3 games against the remaining 4 conference teams (3×4=12 games)
@@ -24,4 +24,6 @@ Upon making a request to each endpoint:
   - reduce back-to-backs
   - reduce travel distance
   - reduce 5 home/away games in a row for teams
-  - ensure that no single team is traveling more or has more back-to-backs than any other team
+  - ensure that no team is signficantly traveling more or has significantly more back-to-backs than the other teams
+
+Each endpoint returns an object displaying the number of back to backs the schedule has along with the optimized schedule.

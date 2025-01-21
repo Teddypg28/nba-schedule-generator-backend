@@ -8,7 +8,7 @@ import { Matchup, Schedule } from './types'
 import { teams } from './teams'
 import getNumBackToBacks from './helpers/getNumBackToBacks'
 
-const PORT_NUMBER = 2828
+const PORT_NUMBER = 8000
 const app = express()
 
 app.listen(PORT_NUMBER, () => {

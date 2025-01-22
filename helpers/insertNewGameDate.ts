@@ -2,7 +2,7 @@ import { Game } from "../types";
 
 // uses binary search to insert the new game date into a team's schedule and keep the schedule order
 export default function insertNewGameDate(teamSchedule: Game[], randomOpenDate: string, newGameObject: Game) {
-    let high = teamSchedule.length
+    let high = teamSchedule.length - 1
     let low = 0
     const newDate = new Date(randomOpenDate).valueOf()
     while (low < high) {

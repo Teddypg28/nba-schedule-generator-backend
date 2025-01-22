@@ -22,9 +22,10 @@ export default function hillClimbing(schedule: Schedule, numIterations: number) 
         const randomGame = selectRandomGame(currentSchedule)
         const mutualOpenDates = getMutualOpenDates(randomGame.home.name, randomGame.away.name, teamAvailableDates)
         if (mutualOpenDates.length > 0) {
+            // save original date in case cost is rejected
             const originalDate = randomGame.date
             // choose random new date that works for both teams
-            const randomOpenDate = selectRandomOpenDate(mutualOpenDates, randomGame)
+            const randomOpenDate = selectRandomOpenDate(mutualOpenDates)
             editTeamSchedule(currentSchedule, randomGame, randomOpenDate)
             // calculate the cost of the schedule after the date change
             const cost = calculateScheduleCost(currentSchedule)

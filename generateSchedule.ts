@@ -3,9 +3,9 @@ import { teams } from './teams'
 import { Matchup, Schedule, Team } from './types'
 
 /*
-    3 Games Each Against 4 Conference Non Division Teams:
+    3 Games Each Against 4 Conference Non Division Teams Explanation:
     
-    Explanation: In the following code, the goal is to find 12 games total for each team against 4 conference, non-division opponents.
+    In the first part of this function, our goal is to find 12 games total for each team against 4 conference, non-division opponents.
     It is important to note that we must keep the home/away balance for each team which can be tricky since we are dealing with an odd
     number of teams. 
 
@@ -15,7 +15,7 @@ import { Matchup, Schedule, Team } from './types'
     to balance out the number of series' each team is scheduled with (2). We then run the loop one more time so that each team has 4 series' (12 games total).
 
     To ensure that home/away games balance out for each team, whenever the "picking division" as we call it in the code is picking teams, if the
-    division right next to the picking division is being selected from those opponents will be given 2 away games and 1 home game, while the
+    division right next to the picking division is being selected from, those opponents will be given 2 away games and 1 home game, while the
     picking division teams are given 2 home games and 1 away game. Otherwise, it flips and 2 home games + 1 away game are given to the opponent
     and 2 away games + 1 home game are given to the picking division teams.
 

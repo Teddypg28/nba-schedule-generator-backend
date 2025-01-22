@@ -1,6 +1,6 @@
 import { Team } from "../types";
 
-// returns distance between two teams in miles
+// returns distance between two teams in miles using the Spherical Law of Cosines
 export default function calculateTripDistance(team1: Team, team2: Team) {
     const [team1Coordinates, team2Coordinates] = [team1.coordinates, team2.coordinates]
     // conversion from degrees to radians

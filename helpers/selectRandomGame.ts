@@ -1,4 +1,4 @@
-import { Game, Schedule } from "../types"
+import { Schedule } from "../types"
 
 export default function selectRandomGame(currentSchedule: Schedule) {
     const randomTeam = Object.keys(currentSchedule)[Math.floor(Math.random() * 30)]

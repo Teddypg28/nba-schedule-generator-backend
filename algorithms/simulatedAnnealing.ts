@@ -5,8 +5,9 @@ import updateTeamAvailableDates from "../helpers/updateTeamAvailableDates";
 import calculateScheduleCost from "../helpers/calculateScheduleCost";
 
 import selectRandomGame from "../helpers/selectRandomGame";
-import changeGameDate from "../helpers/changeGameDate";
-import undoGameDateChange from "../helpers/undoGameDateChange";
+import getMutualOpenDates from "../helpers/getMutualOpenDates";
+import editTeamSchedule from "../helpers/editTeamSchedule";
+import getNewDate from "../helpers/getNewDate";
 
 export default function simulatedAnnealing(schedule: Schedule, temperature: number, coolingRate: number, iterations: number) {
     let currentCost = calculateScheduleCost(schedule)
@@ -23,18 +24,20 @@ export default function simulatedAnnealing(schedule: Schedule, temperature: numb
         temperature = initialTemperature
         while (temperature > 0.001) {
             // select random game
-            const { mutualOpenDates, awayTeamScheduleGame, homeTeamScheduleGame, originalDate } = selectRandomGame(currentSchedule, teamAvailableDates)
+            const randomGame = selectRandomGame(currentSchedule)
+            const mutualOpenDates = getMutualOpenDates(randomGame.home.name, randomGame.away.name, teamAvailableDates)
             if (mutualOpenDates.length > 0) {
-                // change the date of the game to a random date
-                const randomOpenDate = changeGameDate(mutualOpenDates, homeTeamScheduleGame, awayTeamScheduleGame, currentSchedule)
+                // choose random new date that works for both teams
+                const { randomOpenDate, originalDate } = getNewDate(mutualOpenDates, randomGame)
+                editTeamSchedule(currentSchedule, randomGame, randomOpenDate)
                 // calculate the cost of the schedule after the date change
                 const cost = calculateScheduleCost(currentSchedule)
                 // accept the change if the cost is reduced, otherwise undo the change
                 if (cost < currentCost || Math.random() < Math.exp((currentCost - cost) / temperature)) {
                     currentCost = cost
-                    updateTeamAvailableDates(teamAvailableDates, homeTeamScheduleGame.home.name, awayTeamScheduleGame.away.name, randomOpenDate, originalDate )
+                    updateTeamAvailableDates(teamAvailableDates, randomGame.home.name, randomGame.away.name, randomOpenDate, originalDate )
                 } else {
-                    undoGameDateChange(homeTeamScheduleGame, awayTeamScheduleGame, originalDate, currentSchedule)
+                    editTeamSchedule(currentSchedule, randomGame, originalDate)
                 }
             }
             temperature *= coolingRate

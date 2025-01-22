@@ -172,7 +172,6 @@ export default function generateSchedule(schedule: Schedule, selectedMatchups: M
         teamScheduleOpenDates[matchup.away.name].delete(randomOpenDate) 
 
         const gameObject = {
-            id: index+1,
             home: matchup.home,
             away: matchup.away,
             arena: matchup.home.arena,

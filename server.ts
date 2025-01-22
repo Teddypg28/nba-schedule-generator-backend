@@ -55,5 +55,28 @@ app.get('/sa/:temperature/:coolingRate/:iterations', (req, res) => {
     res.send(result)
 })
 
+app.get('/hc/:hcIterations/sa/:temperature/:coolingRate/:saIterations', (req, res) => {
+    let schedule: Schedule = {}
+    teams.forEach(team => schedule[team.name] = [])
+
+    let selectedMatchups: Matchup[] = []
+    let gamesScheduled: Set<string> = new Set();
+
+    const temperature = parseInt(req.params.temperature)
+    const coolingRate = parseFloat(req.params.coolingRate)
+    const saIterations = parseInt(req.params.saIterations)
+    const hcIterations = parseInt(req.params.hcIterations)
+
+    const initialSchedule = generateSchedule(schedule, selectedMatchups, gamesScheduled)
+
+    const hcOptimizedSchedule = hillClimbing(initialSchedule, hcIterations)
+    const saOptimizedSchedule = simulatedAnnealing(hcOptimizedSchedule, temperature, coolingRate, saIterations)
+
+    const numBackToBacks = getNumBackToBacks(saOptimizedSchedule)
+
+    const result = { numBackToBacks, optimizedSchedule: saOptimizedSchedule }
+
+    res.send(result)
+})
 
 

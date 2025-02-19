@@ -161,6 +161,7 @@ export default function generateSchedule(schedule: Schedule, selectedMatchups: M
         })
     })
 
+    // schedule each game to set the schedule before optimization
     selectedMatchups.forEach((matchup: Matchup, index) => {
         const homeTeamOpenDates = Array.from(teamScheduleOpenDates[matchup.home.name])
         const awayTeamOpenDates = teamScheduleOpenDates[matchup.away.name]

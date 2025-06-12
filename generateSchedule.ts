@@ -2,46 +2,47 @@ import getSeasonDates from './helpers/getSeasonDates'
 import { teams } from './teams'
 import { Matchup, Schedule, Team } from './types'
 
-/*
-    3 Games Each Against 4 Conference Non Division Teams Explanation:
-    
-    In the first part of this function, our goal is to find 12 games total for each team against 4 conference, non-division opponents.
-    It is important to note that we must keep the home/away balance for each team which can be tricky since we are dealing with an odd
-    number of teams. 
-
-    To solve this, for each conference, we grouped each of the 3 divisions. Then starting from the first division, each of those teams selects
-    an opponent from the division next to it, and then they go onto select an opponent from the last division. At this point, the first division
-    has 2 series' scheduled and the second and third have 1. So, to end the first loop, the second and third divisions match-make with each other 
-    to balance out the number of series' each team is scheduled with (2). We then run the loop one more time so that each team has 4 series' (12 games total).
-
-    To ensure that home/away games balance out for each team, whenever the "picking division" as we call it in the code is picking teams, if the
-    division right next to the picking division is being selected from, those opponents will be given 2 away games and 1 home game, while the
-    picking division teams are given 2 home games and 1 away game. Otherwise, it flips and 2 home games + 1 away game are given to the opponent
-    and 2 away games + 1 home game are given to the picking division teams.
-
-    Example:
-
-    Division A: Team Blue
-    Division B: Team Purple
-    Division C: Team Green
-
-    1) Blue (from picking division) matches with purple (directly next to picking division) (1 home game for blue, 1 away game for purple)
-    2) Blue (from picking division) matches with green (not directly next to picking division) (1 away game for blue, 1 home game for green)
-    3) Purple (now the picking division) matches with green (directly next to picking division) (1 home game for purple, 1 away game for green)
-
-    Totals: 
-
-    Blue: 1 away, 1 home
-    Purple: 1 away, 1 home
-    Green: 1 away, 1 home
-
-    --- All Balance Out ---
-
-    We run this code in the while loop until 6 home and 6 away games are achieved for each team, since certain random combos when selecting 
-    may lead to a slight imbalance
-*/
-
 export default function generateSchedule(schedule: Schedule, selectedMatchups: Matchup[], gamesScheduled: Set<string>) {
+
+    /*
+        3 Games Each Against 4 Conference Non Division Teams Explanation:
+        
+        In the first part of this function, our goal is to find 12 games total for each team against 4 conference, non-division opponents.
+        It is important to note that we must keep the home/away balance for each team which can be tricky since we are dealing with an odd
+        number of teams. 
+
+        To solve this, for each conference, we grouped each of the 3 divisions. Then starting from the first division, each of those teams selects
+        an opponent from the division next to it, and then they go onto select an opponent from the last division. At this point, the first division
+        has 2 series' scheduled and the second and third have 1. So, to end the first loop, the second and third divisions match-make with each other 
+        to balance out the number of series' each team is scheduled with (2). We then run the loop one more time so that each team has 4 series' (12 games total).
+
+        To ensure that home/away games balance out for each team, whenever the "picking division" as we call it in the code is picking teams, if the
+        division right next to the picking division is being selected from, those opponents will be given 2 away games and 1 home game, while the
+        picking division teams are given 2 home games and 1 away game. Otherwise, if the division being picked from isn't directly next to the picking division,
+        it flips and 2 home games + 1 away game are given to the opponent and 2 away games + 1 home game are given to the picking division teams.
+
+        Example:
+
+        Division A: Team Blue
+        Division B: Team Purple
+        Division C: Team Green
+
+        1) Blue (from picking division) matches with purple (directly next to picking division) (2 home + 1 away for blue, 2 away + 1 home for purple)
+        2) Blue (from picking division) matches with green (not directly next to picking division) (1 home + 2 away for blue, 1 away + 2 home for green)
+        3) Purple (now the picking division) matches with green (directly next to picking division) (2 home + 1 away for purple, 2 away + 1 home for green)
+
+        Totals: 
+
+        Blue: 3 away, 3 home
+        Purple: 3 away, 3 home
+        Green: 3 away, 3 home
+
+        --- All Balance Out ---
+
+        We run this code in the while loop until 6 home and 6 away games are achieved for each team since certain random combos when selecting 
+        may lead to a slight imbalance of home/away games for some teams
+    */
+
     let equalHomeAwayGames = false
     while (!equalHomeAwayGames) {
         selectedMatchups = []
@@ -82,7 +83,7 @@ export default function generateSchedule(schedule: Schedule, selectedMatchups: M
                 }
             })
         }
-        if (teams.every(team => selectedMatchups.filter(matchup => matchup.home.name === team.name).length === 6 && selectedMatchups.filter(matchup => matchup.away.name === team.name).length)) {
+        if (teams.every(team => selectedMatchups.filter(matchup => matchup.home.name === team.name).length === 6 && selectedMatchups.filter(matchup => matchup.away.name === team.name).length === 6)) {
             equalHomeAwayGames = true
         }
     }

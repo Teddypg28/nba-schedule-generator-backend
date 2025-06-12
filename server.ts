@@ -15,6 +15,19 @@ app.listen(PORT_NUMBER, () => {
     console.log(`Server started on PORT ${PORT_NUMBER}`)
 })
 
+app.get('/schedule', (req, res) => {
+
+    let schedule: Schedule = {}
+    teams.forEach(team => schedule[team.name] = [])
+
+    let selectedMatchups: Matchup[] = []
+    let gamesScheduled: Set<string> = new Set();
+
+    const generatedSchedule = generateSchedule(schedule, selectedMatchups, gamesScheduled)
+    res.send(generatedSchedule["Milwaukee Bucks"])
+
+})
+
 app.get('/hc/:iterations', (req, res) => {
     let schedule: Schedule = {}
     teams.forEach(team => schedule[team.name] = [])

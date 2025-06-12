@@ -9,7 +9,7 @@ export default function generateSchedule(schedule: Schedule, selectedMatchups: M
         
         In the first part of this function, our goal is to find 12 games total for each team against 4 conference, non-division opponents.
         It is important to note that we must keep the home/away balance for each team which can be tricky since we are dealing with an odd
-        number of teams. 
+        number of games played in each series. 
 
         To solve this, for each conference, we grouped each of the 3 divisions. Then starting from the first division, each of those teams selects
         an opponent from the division next to it, and then they go onto select an opponent from the last division. At this point, the first division
